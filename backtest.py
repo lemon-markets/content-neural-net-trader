@@ -38,7 +38,7 @@ class DenseNeuralNetTrader(Strategy):
                     latest_close=self.data.Close[-1]
             ):
                 self.buy(size=2)
-            else:
+            elif self.position.size > 0:
                 self.sell(size=2)
         else:
             pass
@@ -77,7 +77,7 @@ class LSTMNeuralNetTrader(Strategy):
                     latest_close=self.data.Close[-1]
             ):
                 self.buy(size=2)
-            else:
+            elif self.position.size > 0:
                 self.sell(size=2)
         else:
             pass
