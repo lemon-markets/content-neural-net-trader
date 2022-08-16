@@ -130,4 +130,5 @@ dmypy.json
 
 # Misc
 data/aapl.csv
-NeuralNetTrader.html
+DenseNeuralNetTrader.html
+LSTMNeuralNetTrader.html

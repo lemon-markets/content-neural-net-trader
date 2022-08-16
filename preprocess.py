@@ -17,6 +17,14 @@ client = api.create(
 
 
 def get_data_from_api(filepath, isin, start_date, end_date=datetime.now()):
+    """
+    Makes request to the ohlc endpoint of the lemon.markets market data API.
+
+    :param filepath: filepath for location/file the function will write to
+    :param isin: isin of the stock data is being gathered for
+    :param start_date: start date of historical period data is being gathered over
+    :param end_date: end date of historical period data is being gathered over
+    """
     def daterange(date1, date2):
         for n in range(int((date2 - date1).days) + 1):
             yield date1 + timedelta(n)
@@ -34,7 +42,7 @@ def get_data_from_api(filepath, isin, start_date, end_date=datetime.now()):
                     from_=dt,
                     decimals=True
                 )
-                if response.pages == 0:
+                if response.pages == 0:  # ignores days the market is closed and no results are found
                     continue
 
                 for i in range(0, len(response.results)):
@@ -50,6 +58,14 @@ def get_data_from_api(filepath, isin, start_date, end_date=datetime.now()):
 
 
 def get_data(filepath, num_hours):
+    """
+    Reads data out of csv file written by get_data_from_api function.
+    Then formats data into training and testing input/output sets.
+
+    :param filepath: filepath to the csv to read from
+    :param num_hours: number of hours used to
+    :return: Training and testing inputs and expected outputs. DataFrame of test data to be used for backtesting.
+    """
     data_set = pd.read_csv(filepath)
     data_frames = pd.DataFrame(data_set)
 

@@ -23,6 +23,8 @@ client = api.create(
 
 def dense_model(x_train_dense, x_test_dense, y_train_dense, y_test_dense, num_hours=60, batch_size=1, epochs=5):
     """
+    Neural network model that attempts to predict stock prices with several dense layers.
+
     :param epochs: number of epochs for which the model is trained - default of 5
     :param batch_size: size of one batch for training - default of 1
     :param num_hours: number of hours used to predict the next hour, default is 60
@@ -51,6 +53,8 @@ def dense_model(x_train_dense, x_test_dense, y_train_dense, y_test_dense, num_ho
 
 def lstm_model(x_train_lstm, x_test_lstm, y_train_lstm, y_test_lstm, batch_size=1, epochs=5):
     """
+    Neural network model that attempts to predict stock prices with LSTM and dense layers.
+
     :param epochs: number of epochs for which the model is trained - default of 5
     :param batch_size: size of one batch for training - default of 1
     :param x_train_lstm: a np array with training inputs
@@ -78,13 +82,15 @@ def lstm_model(x_train_lstm, x_test_lstm, y_train_lstm, y_test_lstm, batch_size=
 
 def nn_trader_decision(model, latest_close, last_n_close_prices):
     """
+    Uses neural network model to make a prediction and make a decision on buy/sell after comparing to latest close.
+
     :param last_n_close_prices: close prices for last n hours being used for prediction
     :param latest_close: latest close price
     :param model: the neural network model being used
     :return: True if the predicted price is higher than the latest price, False if not
     """
-    # LSTM requires [0][0], Dense does not
     prediction = 0
+    # LSTM requires [0][0], Dense does not due to different matrix shapes
     if model._name == 'lstm':
         prediction = model.predict(last_n_close_prices)[0][0]
     elif model._name == 'dense':
@@ -97,6 +103,8 @@ def nn_trader_decision(model, latest_close, last_n_close_prices):
 
 def place_order(isin, num_hours, model, quantity, data_frames):
     """
+    Places buy and sell orders for the selected stock using the lemon.markets API.
+
     :param isin: isin of stock you wish to trade
     :param num_hours: number of hours used in each prediction
     :param model: the model being used for prediction
@@ -174,26 +182,27 @@ if __name__ == '__main__':
     # data file
     filepath = 'data/aapl.csv'
 
-    # This writes OHLC data into a csv for the selected stock/ETF (change the ISIN to change the stock/ETF).
+    # Writes OHLC data into a csv for the selected stock/ETF (change the ISIN to change the stock/ETF).
     if not os.path.exists(filepath):
         get_data_from_api(filepath=filepath, isin=isin, start_date=datetime(year=2021, month=8, day=6))
 
     x_train, y_train, x_test, y_test, test_data_frames = get_data(filepath=filepath, num_hours=num_hours)
 
-    # Dense Model
     dense_model, y_hats_dense = dense_model(
         x_train_dense=x_train,
         x_test_dense=x_test,
         y_train_dense=y_train,
         y_test_dense=y_test
     )
-    # LSTM Model
+    dense_model._name = 'dense'
+
     lstm_model, y_hats_lstm = lstm_model(
         x_train_lstm=x_train,
         x_test_lstm=x_test,
         y_train_lstm=y_train,
         y_test_lstm=y_test
     )
+    lstm_model._name = 'lstm'
 
     # Change the input model(dense_model or lstm_model) to change what you base your decision on.
     place_order(isin=isin, model=dense_model, num_hours=num_hours, quantity=trade_quantity,

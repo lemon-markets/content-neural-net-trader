@@ -6,7 +6,6 @@ from preprocess import get_data
 
 
 class DenseNeuralNetTrader(Strategy):
-
     def __init__(self, broker, data, params):
         super().__init__(broker, data, params)
         self.num_hours = None
