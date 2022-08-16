@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Misc
-data.csv
+data/aapl.csv
 NeuralNetTrader.html

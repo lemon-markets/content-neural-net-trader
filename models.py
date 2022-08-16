@@ -1,14 +1,16 @@
-import numpy as np
 import os
+from datetime import datetime
 
-import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
+from dotenv import load_dotenv
 from keras.layers import LSTM, Dense
 from keras.models import Sequential
-import matplotlib.pyplot as plt
-from datetime import datetime, timedelta
 from lemon import api
-from dotenv import load_dotenv
-from backtesting import Backtest, Strategy
+from pytz import utc
+
 from preprocess import get_data, get_data_from_api
 
 load_dotenv()
@@ -21,6 +23,9 @@ client = api.create(
 
 def dense_model(x_train_dense, x_test_dense, y_train_dense, y_test_dense, num_hours=60, batch_size=1, epochs=5):
     """
+    :param epochs: number of epochs for which the model is trained - default of 5
+    :param batch_size: size of one batch for training - default of 1
+    :param num_hours: number of hours used to predict the next hour, default is 60
     :param x_train_dense: a np array with training inputs
     :param x_test_dense: a np array with testing inputs
     :param y_train_dense: a np array with expected training outputs
@@ -46,6 +51,8 @@ def dense_model(x_train_dense, x_test_dense, y_train_dense, y_test_dense, num_ho
 
 def lstm_model(x_train_lstm, x_test_lstm, y_train_lstm, y_test_lstm, batch_size=1, epochs=5):
     """
+    :param epochs: number of epochs for which the model is trained - default of 5
+    :param batch_size: size of one batch for training - default of 1
     :param x_train_lstm: a np array with training inputs
     :param x_test_lstm: a np array with testing inputs
     :param y_train_lstm: a np array with expected training outputs
@@ -71,12 +78,17 @@ def lstm_model(x_train_lstm, x_test_lstm, y_train_lstm, y_test_lstm, batch_size=
 
 def nn_trader_decision(model, latest_close, last_n_close_prices):
     """
+    :param last_n_close_prices: close prices for last n hours being used for prediction
+    :param latest_close: latest close price
     :param model: the neural network model being used
-    :param num_hours: number of hours used in each prediction
     :return: True if the predicted price is higher than the latest price, False if not
     """
     # LSTM requires [0][0], Dense does not
-    prediction = model.predict(last_n_close_prices)[0][0]
+    prediction = 0
+    if model._name == 'lstm':
+        prediction = model.predict(last_n_close_prices)[0][0]
+    elif model._name == 'dense':
+        prediction = model.predict(last_n_close_prices)
     if prediction > latest_close:
         return True
     else:
@@ -89,7 +101,6 @@ def place_order(isin, num_hours, model, quantity, data_frames):
     :param num_hours: number of hours used in each prediction
     :param model: the model being used for prediction
     :param quantity: the quantity of stock/ETF being traded each time the function is called
-    :return: None
     """
     venue = client.market_data.venues.get(mic='xmun').results[0]
     if not venue.is_open:
@@ -107,7 +118,6 @@ def place_order(isin, num_hours, model, quantity, data_frames):
     last_n_close_prices = np.reshape(last_n_close_prices, (1, last_n_close_prices.shape[0]))
 
     if nn_trader_decision(
-            num_hours=num_hours,
             model=model,
             latest_close=latest_close,
             last_n_close_prices=last_n_close_prices
@@ -153,47 +163,6 @@ def place_order(isin, num_hours, model, quantity, data_frames):
             print(f'2{e}')
 
 
-class NeuralNetTrader(Strategy):
-    num_hours = 60
-    x_train, y_train, x_test, y_test, test_data_frames = get_data('data.csv', num_hours=num_hours)
-
-    # Dense Model
-    # dense, y_hats_dense = dense_model(
-    #     x_train_dense=x_train,
-    #     x_test_dense=x_test,
-    #     y_train_dense=y_train,
-    #     y_test_dense=y_test,
-    #     num_hours=num_hours
-    # )
-
-    # LSTM Model
-    lstm, y_hats_lstm = lstm_model(
-        x_train_lstm=x_train,
-        x_test_lstm=x_test,
-        y_train_lstm=y_train,
-        y_test_lstm=y_test
-    )
-
-    def init(self):
-        pass
-
-    def next(self):
-        if self.data.Close.shape[0] >= num_hours:
-            latest_close_prices = np.array(self.data.Close[-1 * num_hours:], dtype=float)
-            # shape for LSTM is (shape[0], 1, 1) for Dense it is (1, shape[0])
-            latest_close_prices = np.reshape(latest_close_prices, (latest_close_prices.shape[0], 1, 1))
-            if nn_trader_decision(
-                    model=self.lstm,
-                    last_n_close_prices=latest_close_prices,
-                    latest_close=self.data.Close[-1]
-            ):
-                self.buy(size=2)
-            else:
-                self.sell(size=2)
-        else:
-            pass
-
-
 if __name__ == '__main__':
     # hyper-parameters
     num_hours = 60
@@ -202,43 +171,49 @@ if __name__ == '__main__':
     epochs = 5
     isin = 'US0378331005'
 
-    # This writes OHLC data into a csv for the selected stock/ETF (change the ISIN to change the stock/ETF).
-    # Uncomment if no data.csv exists!
-    # get_data_from_api(isin=isin, start_date=datetime(year=2021, month=8, day=6))
+    # data file
+    filepath = 'data/aapl.csv'
 
-    x_train, y_train, x_test, y_test, test_data_frames = get_data('data.csv', num_hours=num_hours)
+    # This writes OHLC data into a csv for the selected stock/ETF (change the ISIN to change the stock/ETF).
+    if not os.path.exists(filepath):
+        get_data_from_api(filepath=filepath, isin=isin, start_date=datetime(year=2021, month=8, day=6))
+
+    x_train, y_train, x_test, y_test, test_data_frames = get_data(filepath=filepath, num_hours=num_hours)
 
     # Dense Model
-    # dense_model, y_hats_dense = dense_model(
-    #     x_train_dense=x_train,
-    #     x_test_dense=x_test,
-    #     y_train_dense=y_train,
-    #     y_test_dense=y_test
-    # )
+    dense_model, y_hats_dense = dense_model(
+        x_train_dense=x_train,
+        x_test_dense=x_test,
+        y_train_dense=y_train,
+        y_test_dense=y_test
+    )
     # LSTM Model
-    # lstm_model, y_hats_lstm = lstm_model(
-    #     x_train_lstm=x_train,
-    #     x_test_lstm=x_test,
-    #     y_train_lstm=y_train,
-    #     y_test_lstm=y_test
-    # )
+    lstm_model, y_hats_lstm = lstm_model(
+        x_train_lstm=x_train,
+        x_test_lstm=x_test,
+        y_train_lstm=y_train,
+        y_test_lstm=y_test
+    )
+
     # Change the input model(dense_model or lstm_model) to change what you base your decision on.
-    # place_order(isin=isin, model=dense_model, num_hours=num_hours, quantity=trade_quantity, data_frames=test_data_frames)
+    place_order(isin=isin, model=dense_model, num_hours=num_hours, quantity=trade_quantity,
+                data_frames=test_data_frames)
+
+    scheduler = BlockingScheduler(timezone=utc)  # coordinated universal time, CET is UTC+1 (CEST is UTC+2)
+    for x in range(13):
+        scheduler.add_job(
+            place_order, args=(isin, dense_model, num_hours, trade_quantity, test_data_frames),
+            trigger=CronTrigger(day_of_week="mon-fri",
+                                hour=6 + x,
+                                minute=30,
+                                timezone=utc),
+            name="Perform Mean Reversion Hourly")
+
+    print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
 
     # Compare predictions of both models to the actual OHLC.
-    # plt.plot(np.array(range(len(y_test), len(y_train) + len(y_test))), y_train)  # add training data plot to the graph
-    # plt.plot(y_test)
-    # plt.plot(y_hats_dense)
-    # plt.plot(y_hats_lstm)
-    # plt.legend(['Validation', 'Dense Pred.', 'LSTM Pred.'], loc='lower right')
-    # plt.show()
-
-    bt = Backtest(
-        data=test_data_frames,
-        strategy=NeuralNetTrader,
-        cash=100000,
-        commission=0,
-        exclusive_orders=True
-    )
-    output = bt.run()
-    bt.plot()
+    plt.plot(y_test)
+    plt.plot(y_hats_dense)
+    plt.plot(y_hats_lstm)
+    plt.legend(['Validation', 'Dense Pred.', 'LSTM Pred.'], loc='lower right')
+    plt.show()

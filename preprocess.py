@@ -1,15 +1,12 @@
 import csv
 import math
-import yfinance as yf
-from sklearn.preprocessing import MinMaxScaler
 import os
-from lemon import api
-from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv
-import pandas as pd
-import numpy as np
-import tensorflow as tf
+from datetime import datetime, timedelta
 
+import numpy as np
+import pandas as pd
+from dotenv import load_dotenv
+from lemon import api
 
 load_dotenv()
 client = api.create(
@@ -19,12 +16,12 @@ client = api.create(
 )
 
 
-def get_data_from_api(isin, start_date, end_date=datetime.now()):
+def get_data_from_api(filepath, isin, start_date, end_date=datetime.now()):
     def daterange(date1, date2):
         for n in range(int((date2 - date1).days) + 1):
             yield date1 + timedelta(n)
 
-    with open("data.csv", 'w') as f:
+    with open(filepath, 'w') as f:
         writer = csv.writer(f)
         writer.writerow(['', 'Open', 'High', 'Low', 'Close', 'Volume'])
         weekdays = [6, 7]
