@@ -205,20 +205,29 @@ if __name__ == '__main__':
     lstm_model._name = 'lstm'
 
     # Change the input model(dense_model or lstm_model) to change what you base your decision on.
-    place_order(isin=isin, model=dense_model, num_hours=num_hours, quantity=trade_quantity,
-                data_frames=test_data_frames)
+    # place_order(isin=isin, model=dense_model, num_hours=num_hours, quantity=trade_quantity,
+    #             data_frames=test_data_frames)
 
     scheduler = BlockingScheduler(timezone=utc)  # coordinated universal time, CET is UTC+1 (CEST is UTC+2)
     for x in range(13):
         scheduler.add_job(
-            place_order, args=(isin, dense_model, num_hours, trade_quantity, test_data_frames),
+            place_order, kwargs={"isin": isin,
+                                 "model": dense_model,
+                                 "num_hours": num_hours,
+                                 "quantity": trade_quantity,
+                                 "data_frames": test_data_frames},
             trigger=CronTrigger(day_of_week="mon-fri",
                                 hour=6 + x,
                                 minute=30,
                                 timezone=utc),
-            name="Perform Mean Reversion Hourly")
+            name="Perform Trades Hourly")
 
     print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
+
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass
 
     # Compare predictions of both models to the actual OHLC.
     plt.plot(y_test)

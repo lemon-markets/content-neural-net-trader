@@ -39,7 +39,7 @@ class DenseNeuralNetTrader(Strategy):
             ):
                 self.buy(size=2)
             elif self.position.size > 0:
-                self.sell(size=2)
+                self.sell(size=self.position.size)
         else:
             pass
 
@@ -71,13 +71,13 @@ class LSTMNeuralNetTrader(Strategy):
         if self.data.Close.shape[0] >= self.num_hours:
             latest_close_prices = np.array(self.data.Close[-1 * self.num_hours:], dtype=float)
             latest_close_prices = np.reshape(latest_close_prices, (latest_close_prices.shape[0], 1, 1))
-            if nn_trader_decision(
+            if not nn_trader_decision(
                     model=self.lstm,
                     last_n_close_prices=latest_close_prices,
                     latest_close=self.data.Close[-1]
             ):
                 self.buy(size=2)
-            elif self.position.size > 0:
+            else:
                 self.sell(size=2)
         else:
             pass
@@ -93,9 +93,9 @@ if __name__ == '__main__':
         strategy=DenseNeuralNetTrader,
         cash=100000,
         commission=0,
-        exclusive_orders=True
     )
     dense_output = bt.run()
+    print(dense_output)
     bt.plot()  # generate an informative HTML graphic for your backtest
 
     bt = Backtest(
@@ -106,4 +106,5 @@ if __name__ == '__main__':
         exclusive_orders=True
     )
     lstm_output = bt.run()
+    print(lstm_output)
     bt.plot()

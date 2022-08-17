@@ -4,10 +4,10 @@
 
 ## 👋 Introduction 
 
-This is a public [lemon.markets](https://lemon.markets) repository that demonstrates a simple implementation of creating 
-a trading bot with Tensorflow and the lemon.markets API.
-Based on your preference you can trade with a dense neural network or a LSTM neural network with our pre-built functions 
-(and tweak hyper-parameters in models.py to be whatever you want)!
+This is a public [lemon.markets](https://lemon.markets) repository that demonstrates a simple implementation of  
+a deep learning trading bot with Tensorflow and the lemon.markets API.
+Based on your preference you can trade with a dense neural network or a LSTM neural network using our pre-built functions 
+(and tweak hyperparameters in models.py to be whatever you want)!
 
 To get a general understanding of the API, please refer to our [documentation](https://docs.lemon.markets).
 

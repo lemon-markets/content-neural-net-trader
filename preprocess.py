@@ -64,7 +64,8 @@ def get_data(filepath, num_hours):
 
     :param filepath: filepath to the csv to read from
     :param num_hours: number of hours used to
-    :return: Training and testing inputs and expected outputs. DataFrame of test data to be used for backtesting.
+    :return: Training and testing inputs and expected outputs.
+            DataFrame of test data to be used for backtesting.
     """
     data_set = pd.read_csv(filepath)
     data_frames = pd.DataFrame(data_set)
@@ -83,7 +84,8 @@ def get_data(filepath, num_hours):
         y_train_prices.append(train_prices[i])
 
     x_train_prices, y_train_prices = np.array(x_train_prices, dtype=float), np.array(y_train_prices, dtype=float)
-    x_train_prices = np.reshape(x_train_prices, (x_train_prices.shape[0], x_train_prices.shape[1], 1))
+    x_train_prices = np.reshape(x_train_prices,
+                                (x_train_prices.shape[0], x_train_prices.shape[1], 1))
 
     x_test_prices = []
     y_test_prices = []
@@ -93,7 +95,8 @@ def get_data(filepath, num_hours):
         y_test_prices.append(test_prices[i])
 
     x_test_prices, y_test_prices = np.array(x_test_prices, dtype=float), np.array(y_test_prices, dtype=float)
-    x_test_prices = np.reshape(x_test_prices, (x_test_prices.shape[0], x_test_prices.shape[1], 1))
+    x_test_prices = np.reshape(x_test_prices,
+                               (x_test_prices.shape[0], x_test_prices.shape[1], 1))
 
     test_data_frames = data_frames.iloc[0:x_test_prices.shape[0], :]
 
