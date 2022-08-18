@@ -86,7 +86,8 @@ def get_data(filepath, num_hours):
     x_train_prices, y_train_prices = np.array(x_train_prices, dtype=float), np.array(y_train_prices, dtype=float)
     x_train_prices = np.reshape(x_train_prices,
                                 (x_train_prices.shape[0], x_train_prices.shape[1], 1))
-
+    print(x_train_prices.shape[0])
+    print(x_train_prices.shape[1])
     x_test_prices = []
     y_test_prices = []
 

@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 # Misc
+.idea
 data/aapl.csv
 DenseNeuralNetTrader.html
 LSTMNeuralNetTrader.html

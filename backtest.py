@@ -31,7 +31,10 @@ class DenseNeuralNetTrader(Strategy):
     def next(self):
         if self.data.Close.shape[0] >= self.num_hours:
             latest_close_prices = np.array(self.data.Close[-1 * self.num_hours:], dtype=float)
-            latest_close_prices = np.reshape(latest_close_prices, (1, latest_close_prices.shape[0]))
+            # Reshape the input to fit the model and make matrix multiplication possible. When training, shape was:
+            #   number of training examples x num_hours
+            # So, we use 1 x num_hours here to make a single prediction.
+            latest_close_prices = np.reshape(latest_close_prices, (1, num_hours))
             if nn_trader_decision(
                     model=self.dense,
                     last_n_close_prices=latest_close_prices,
@@ -70,7 +73,10 @@ class LSTMNeuralNetTrader(Strategy):
     def next(self):
         if self.data.Close.shape[0] >= self.num_hours:
             latest_close_prices = np.array(self.data.Close[-1 * self.num_hours:], dtype=float)
-            latest_close_prices = np.reshape(latest_close_prices, (latest_close_prices.shape[0], 1, 1))
+            # Reshape the input to fit the model and make matrix multiplication possible. When training, shape was:
+            #   number of training examples x num_hours x 1 (since LSTMs require 3D input).
+            # So, we use 1 x num_hours x 1 here to make a single prediction.
+            latest_close_prices = np.reshape(latest_close_prices, (1, num_hours, 1))
             if not nn_trader_decision(
                     model=self.lstm,
                     last_n_close_prices=latest_close_prices,
