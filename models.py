@@ -136,7 +136,7 @@ def place_order(isin, num_hours, model, quantity, data_frames):
         price = client.market_data.quotes.get_latest(isin=isin).results[0].a
         if price * quantity < 50:  # make sure the order amount is large enough to pass through the api
             print(f"This order totals, €{price * quantity}, which is below the minimum order amount of €50.")
-        # create a buy order if True is returned by MR decision function
+        # create a buy order if True is returned by NN decision function
         try:
             print('buy')
             placed_order = client.trading.orders.create(
