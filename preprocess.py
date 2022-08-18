@@ -84,6 +84,8 @@ def get_data(filepath, num_hours):
         y_train_prices.append(train_prices[i])
 
     x_train_prices, y_train_prices = np.array(x_train_prices, dtype=float), np.array(y_train_prices, dtype=float)
+    # reshape matrices to fit the model: number of training examples x num_hours x 1
+    # matrices are 3D as LSTM model in models.py requires 3D inputs
     x_train_prices = np.reshape(x_train_prices,
                                 (x_train_prices.shape[0], x_train_prices.shape[1], 1))
     print(x_train_prices.shape[0])
@@ -96,6 +98,7 @@ def get_data(filepath, num_hours):
         y_test_prices.append(test_prices[i])
 
     x_test_prices, y_test_prices = np.array(x_test_prices, dtype=float), np.array(y_test_prices, dtype=float)
+    # reshape matrices to fit the model: number of testing examples x num_hours x 1
     x_test_prices = np.reshape(x_test_prices,
                                (x_test_prices.shape[0], x_test_prices.shape[1], 1))
 

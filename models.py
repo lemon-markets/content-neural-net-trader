@@ -123,6 +123,9 @@ def place_order(isin, num_hours, model, quantity, data_frames):
 
     close_prices = np.array(data_frames.values[:, 4], dtype=float)
     last_n_close_prices = close_prices[-1 * num_hours:]
+    # Reshape the input to fit the model and prediction possible. When training, shape was:
+    #   number of training examples x num_hours
+    # So, we use 1 x num_hours here to make a single prediction.
     last_n_close_prices = np.reshape(last_n_close_prices, (1, last_n_close_prices.shape[0]))
 
     if nn_trader_decision(
