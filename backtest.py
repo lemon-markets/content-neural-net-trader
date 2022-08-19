@@ -40,7 +40,7 @@ class DenseNeuralNetTrader(Strategy):
                     last_n_close_prices=latest_close_prices,
                     latest_close=self.data.Close[-1]
             ):
-                self.buy(size=2)
+                self.buy(size=50)
             elif self.position.size > 0:
                 self.sell(size=self.position.size)
         else:

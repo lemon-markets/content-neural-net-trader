@@ -91,8 +91,6 @@ def get_data(filepath, num_hours):
     # matrices are 3D as LSTM model in models.py requires 3D inputs
     x_train_prices = np.reshape(x_train_prices,
                                 (x_train_prices.shape[0], x_train_prices.shape[1], 1))
-    print(x_train_prices.shape[0])
-    print(x_train_prices.shape[1])
     x_test_prices = []
     y_test_prices = []
 
