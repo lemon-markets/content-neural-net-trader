@@ -77,14 +77,14 @@ class LSTMNeuralNetTrader(Strategy):
             #   number of training examples x num_hours x 1 (since LSTMs require 3D input).
             # So, we use 1 x num_hours x 1 here to make a single prediction.
             latest_close_prices = np.reshape(latest_close_prices, (1, num_hours, 1))
-            if not nn_trader_decision(
+            if nn_trader_decision(
                     model=self.lstm,
                     last_n_close_prices=latest_close_prices,
                     latest_close=self.data.Close[-1]
             ):
-                self.buy(size=2)
-            else:
-                self.sell(size=2)
+                self.buy(size=50)
+            elif self.position.size > 0:
+                self.sell(size=self.position.size)
         else:
             pass
 
@@ -94,22 +94,21 @@ if __name__ == '__main__':
 
     x_train, y_train, x_test, y_test, test_data_frames = get_data('data/aapl.csv', num_hours=num_hours)
 
-    bt = Backtest(
-        data=test_data_frames,
-        strategy=DenseNeuralNetTrader,
-        cash=100000,
-        commission=0,
-    )
-    dense_output = bt.run()
-    print(dense_output)
-    bt.plot()  # generate an informative HTML graphic for your backtest
+    # bt = Backtest(
+    #     data=test_data_frames,
+    #     strategy=DenseNeuralNetTrader,
+    #     cash=100000,
+    #     commission=0,
+    # )
+    # dense_output = bt.run()
+    # print(dense_output)
+    # bt.plot()  # generate an informative HTML graphic for your backtest
 
     bt = Backtest(
         data=test_data_frames,
         strategy=LSTMNeuralNetTrader,
         cash=100000,
         commission=0,
-        exclusive_orders=True
     )
     lstm_output = bt.run()
     print(lstm_output)

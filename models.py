@@ -34,6 +34,7 @@ def dense_model(x_train_dense, x_test_dense, y_train_dense, y_test_dense, num_ho
     :param y_test_dense: a np array with expected testing outputs
     :return: the trained model and its predictions on testing inputs
     """
+    # reshape to 2D matrix with dims to fit the dense model: number of training examples x num_hours
     x_train_array = np.reshape(x_train_dense, (x_train_dense.shape[0], num_hours))
     x_test_array = np.reshape(x_test_dense, (x_test_dense.shape[0], num_hours))
     dense_model_layers = Sequential([
@@ -207,12 +208,16 @@ if __name__ == '__main__':
     )
     lstm_model._name = 'lstm'
 
-    # Change the input model(dense_model or lstm_model) to change what you base your decision on.
-    # place_order(isin=isin, model=dense_model, num_hours=num_hours, quantity=trade_quantity,
-    #             data_frames=test_data_frames)
+    # Compare predictions of both models to the actual OHLC.
+    plt.plot(y_test)
+    plt.plot(y_hats_dense)
+    plt.plot(y_hats_lstm)
+    plt.legend(['Validation', 'Dense Pred.', 'LSTM Pred.'], loc='lower right')
+    plt.show()
 
     scheduler = BlockingScheduler(timezone=utc)  # coordinated universal time, CET is UTC+1 (CEST is UTC+2)
     for x in range(13):
+        # Change the input model(dense_model or lstm_model) to change what you base your decision on.
         scheduler.add_job(
             place_order, kwargs={"isin": isin,
                                  "model": dense_model,
@@ -232,9 +237,4 @@ if __name__ == '__main__':
     except (KeyboardInterrupt, SystemExit):
         pass
 
-    # Compare predictions of both models to the actual OHLC.
-    plt.plot(y_test)
-    plt.plot(y_hats_dense)
-    plt.plot(y_hats_lstm)
-    plt.legend(['Validation', 'Dense Pred.', 'LSTM Pred.'], loc='lower right')
-    plt.show()
+

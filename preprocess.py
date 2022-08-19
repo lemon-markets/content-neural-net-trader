@@ -31,7 +31,7 @@ def get_data_from_api(filepath, isin, start_date, end_date=datetime.now()):
 
     with open(filepath, 'w') as f:
         writer = csv.writer(f)
-        writer.writerow(['', 'Open', 'High', 'Low', 'Close', 'Volume'])
+        writer.writerow(['Time', 'Open', 'High', 'Low', 'Close', 'Volume'])
         weekdays = [6, 7]
         for dt in daterange(start_date, end_date):
             if dt.isoweekday() not in weekdays:
@@ -70,7 +70,10 @@ def get_data(filepath, num_hours):
     data_set = pd.read_csv(filepath)
     data_frames = pd.DataFrame(data_set)
 
-    close_prices = np.array(data_frames.values[:, 4])
+    data_frames.index = pd.to_datetime(data_frames.values[:, 0])
+    data_frames = data_frames.drop(columns='Time')
+
+    close_prices = np.array(data_frames.values[:, 3])
 
     testing_data_len = math.ceil(len(close_prices) * 0.2)
     train_prices = close_prices[testing_data_len:]
