@@ -71,7 +71,7 @@ def get_data(filepath, num_hours):
     data_frames = pd.DataFrame(data_set)
 
     data_frames.index = pd.to_datetime(data_frames.values[:, 0])
-    data_frames = data_frames.drop(columns='Time')
+    data_frames = data_frames.drop(columns='Unnamed: 0')
 
     close_prices = np.array(data_frames.values[:, 3])
 
