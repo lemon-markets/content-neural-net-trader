@@ -36,7 +36,8 @@ The script uses several environment variables, configure your .env file as follo
 | ENV Variable    |               Explanation               |
 |-----------------|:---------------------------------------:|
 | DATA_API_KEY    |        Your market data API key         |
-| TRADING_API_KEY |    Your paper/money trading API key     |
+| PAPER_TRADING_API_KEY |    Your paper/money trading API key     |
+| LIVE_TRADING_API_KEY| Your live trading API key (if you've upgraded to live trading)|
 
 
 ## ☁️ Deploy to Heroku
