@@ -73,6 +73,7 @@ class LSTMNeuralNetTrader(Strategy):
     def next(self):
         if self.data.Close.shape[0] >= self.num_hours:
             latest_close_prices = np.array(self.data.Close[-1 * self.num_hours:], dtype=float)
+
             # Reshape the input to fit the model and make matrix multiplication possible. When training, shape was:
             #   number of training examples x num_hours x 1 (since LSTMs require 3D input).
             # So, we use 1 x num_hours x 1 here to make a single prediction.
@@ -83,7 +84,7 @@ class LSTMNeuralNetTrader(Strategy):
                     latest_close=self.data.Close[-1]
             ):
                 self.buy(size=50)
-            elif self.position.size > 0:
+            elif self.position.size:
                 self.sell(size=self.position.size)
         else:
             pass
