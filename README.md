@@ -11,14 +11,13 @@ Based on your preference you can trade with a dense neural network or a LSTM neu
 
 To get a general understanding of the API, please refer to our [documentation](https://docs.lemon.markets).
 
-A walk-through of this script can be found in our YouTube video.
-
 ## 🏃‍♂️ Quick Start
 Not interested in reading a novella before you get started? We get it! To get this project up and running quickly, here's what you need to do:
-1. Clone this repository;
-2. Sign up to [lemon.markets](https://www.lemon.markets/)
-3. Configure your environment variables as outlined in the 'Configuration' section;
-4. Take a look at the functions in models.py and backtest.py, and, if you want to, check out our accompanying YouTube video!
+1. Clone this repository.
+2. Sign up to [lemon.markets](https://www.lemon.markets/)!
+3. Configure your environment variables as outlined in the 'Configuration' section!
+4. Take a look at the functions in models.py and backtest.py!
+5. Create a directory named data for the get_data methods to write to and read from!
 5. Run the code & see how it performs! 
 
 
